@@ -1,0 +1,91 @@
+name: Build and Release
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build-release:
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.23.x'
+
+      - name: Read version
+        shell: pwsh
+        run: |
+          $version = (Get-Content VERSION.txt -Raw).Trim()
+          if (-not $version) { throw "VERSION.txt is empty" }
+          "VERSION=$version" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+          "TAG=v$version" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+
+      - name: Public baseline check
+        shell: pwsh
+        run: python scripts/check_public_baseline.py
+
+      - name: Build release package
+        shell: pwsh
+        run: ./scripts/build_release.ps1
+
+      - name: Publish release
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          $zip = "dist/MiniBin - $env:VERSION.zip"
+          if (-not (Test-Path $zip)) { throw "Release archive not found: $zip" }
+
+          gh release view $env:TAG --repo $env:GITHUB_REPOSITORY *> $null
+          if ($LASTEXITCODE -eq 0) {
+            Write-Host "Release $env:TAG already exists; nothing to publish."
+            exit 0
+          }
+
+          @"
+          ## MiniBin $env:VERSION
+
+          Public Windows release of MiniBin.
+
+          ### Highlights
+          - Windows system-tray utility for Recycle Bin management.
+          - Manual and automatic cleanup.
+          - Five tray-icon fill states.
+          - Empty `My Function` extension point for custom features.
+          - Portable package; no installer required.
+
+          See `CHANGELOG.md` and `docs/` for details.
+          "@ | Set-Content RELEASE_NOTES.md -Encoding utf8
+
+          gh release create $env:TAG $zip --repo $env:GITHUB_REPOSITORY --target $env:GITHUB_SHA --title "MiniBin $env:VERSION" --notes-file RELEASE_NOTES.md
+
+      - name: Set repository topics
+        continue-on-error: true
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          $body = @{
+            names = @(
+              "windows",
+              "windows-utility",
+              "recycle-bin",
+              "tray-app",
+              "cleanup",
+              "golang",
+              "win32",
+              "minibin"
+            )
+          } | ConvertTo-Json -Compress
+
+          $body | gh api --method PUT "repos/$env:GITHUB_REPOSITORY/topics" --input -
