@@ -14,6 +14,18 @@
 
 MiniBin работает в системном трее, показывает состояние Корзины одной из пяти иконок и позволяет быстро открыть или очистить Корзину. Ручная и автоматическая очистка также пытаются удалить содержимое пользовательской временной папки и `%WINDIR%\Temp`.
 
+## Скриншоты
+
+<div align="center">
+
+<img src="docs/screenshots/tray.png" alt="MiniBin tray icon" width="180">
+
+<br><br>
+
+<img src="docs/screenshots/menu.png" alt="MiniBin tray menu" width="250">
+
+</div>
+
 ## Возможности
 
 - `Open` — открыть стандартную Корзину Windows.
@@ -49,10 +61,11 @@ Exit
 
 ## Быстрый запуск
 
-1. Скачайте `MiniBin - 1.1.zip` из Releases.
-2. Распакуйте архив в отдельную папку.
-3. Запустите `MiniBin.exe`.
-4. Не удаляйте файлы `empty.ico`, `25.ico`, `50.ico`, `75.ico`, `full.ico`: они используются значком в системном трее.
+1. Откройте раздел **Releases**.
+2. Скачайте `MiniBin - 1.1.zip`.
+3. Распакуйте архив в отдельную папку.
+4. Запустите `MiniBin.exe`.
+5. Не удаляйте файлы `empty.ico`, `25.ico`, `50.ico`, `75.ico`, `full.ico`: они используются значком в системном трее.
 
 ## Конфигурация
 
@@ -101,6 +114,15 @@ MiniBin/
 ├── LICENSE
 └── README.md
 ```
+
+## Документация
+
+- [Руководство пользователя](docs/USER_GUIDE_RU.md)
+- [Архитектура](docs/ARCHITECTURE_RU.md)
+- [Разработка и сборка](docs/DEVELOPMENT_RU.md)
+- [My Function](docs/MY_FUNCTION_RU.md)
+- [Добавление своих функций](docs/ADDING_FUNCTIONS_RU.md)
+- [Release checklist](docs/RELEASE_CHECKLIST_RU.md)
 
 ## Лицензия
 
