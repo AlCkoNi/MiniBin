@@ -4,11 +4,16 @@
 
 **Компактная Windows-утилита для управления Корзиной из системного трея.**
 
+[English](README_EN.md) · Русский
+
 ![Version](https://img.shields.io/badge/version-1.1-blue)
+![Latest release](https://img.shields.io/github/v/release/AlCkoNi/MiniBin?label=release)
 ![Platform](https://img.shields.io/badge/platform-Windows-0078D6)
 ![Architecture](https://img.shields.io/badge/architecture-x86-lightgrey)
 ![Go](https://img.shields.io/badge/Go-1.23-00ADD8)
 ![License](https://img.shields.io/badge/license-MIT-green)
+
+[**Скачать последнюю версию**](https://github.com/AlCkoNi/MiniBin/releases/latest)
 
 </div>
 
