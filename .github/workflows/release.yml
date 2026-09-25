@@ -4,6 +4,13 @@ on:
   push:
     branches:
       - main
+    paths:
+      - VERSION.txt
+      - minibin.ini
+      - src/**
+      - assets/**
+      - scripts/**
+      - .github/workflows/release.yml
   workflow_dispatch:
 
 permissions:
@@ -37,30 +44,6 @@ jobs:
       - name: Build release package
         shell: pwsh
         run: ./scripts/build_release.ps1
-
-      - name: Update repository metadata
-        continue-on-error: true
-        shell: pwsh
-        env:
-          GH_TOKEN: ${{ github.token }}
-        run: |
-          $description = "MiniBin — компактная Windows-утилита для управления Корзиной из системного трея: ручная и автоматическая очистка, очистка временных файлов и расширяемое меню My Function."
-          gh api --method PATCH "repos/$env:GITHUB_REPOSITORY" -f description="$description"
-
-          $body = @{
-            names = @(
-              "windows",
-              "windows-utility",
-              "recycle-bin",
-              "tray-app",
-              "cleanup",
-              "golang",
-              "win32",
-              "minibin"
-            )
-          } | ConvertTo-Json -Compress
-
-          $body | gh api --method PUT "repos/$env:GITHUB_REPOSITORY/topics" --input -
 
       - name: Publish release
         shell: pwsh
