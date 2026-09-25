@@ -1,0 +1,9 @@
+/build/
+/dist/
+*.zip
+*.exe
+*.log
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
