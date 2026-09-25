@@ -38,6 +38,30 @@ jobs:
         shell: pwsh
         run: ./scripts/build_release.ps1
 
+      - name: Update repository metadata
+        continue-on-error: true
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          $description = "MiniBin — компактная Windows-утилита для управления Корзиной из системного трея: ручная и автоматическая очистка, очистка временных файлов и расширяемое меню My Function."
+          gh api --method PATCH "repos/$env:GITHUB_REPOSITORY" -f description="$description"
+
+          $body = @{
+            names = @(
+              "windows",
+              "windows-utility",
+              "recycle-bin",
+              "tray-app",
+              "cleanup",
+              "golang",
+              "win32",
+              "minibin"
+            )
+          } | ConvertTo-Json -Compress
+
+          $body | gh api --method PUT "repos/$env:GITHUB_REPOSITORY/topics" --input -
+
       - name: Publish release
         shell: pwsh
         env:
@@ -48,7 +72,15 @@ jobs:
 
           gh release view $env:TAG --repo $env:GITHUB_REPOSITORY *> $null
           if ($LASTEXITCODE -eq 0) {
-            Write-Host "Release $env:TAG already exists; nothing to publish."
+            Write-Host "Release $env:TAG already exists."
+
+            $releaseJson = gh api "repos/$env:GITHUB_REPOSITORY/releases/tags/$env:TAG"
+            $release = $releaseJson | ConvertFrom-Json
+            foreach ($asset in $release.assets) {
+              if ($asset.name -like "*.zip") {
+                gh api --method PATCH "repos/$env:GITHUB_REPOSITORY/releases/assets/$($asset.id)" -f label="MiniBin - $env:VERSION.zip" | Out-Null
+              }
+            }
             exit 0
           }
 
@@ -67,25 +99,5 @@ jobs:
           See `CHANGELOG.md` and `docs/` for details.
           "@ | Set-Content RELEASE_NOTES.md -Encoding utf8
 
-          gh release create $env:TAG $zip --repo $env:GITHUB_REPOSITORY --target $env:GITHUB_SHA --title "MiniBin $env:VERSION" --notes-file RELEASE_NOTES.md
-
-      - name: Set repository topics
-        continue-on-error: true
-        shell: pwsh
-        env:
-          GH_TOKEN: ${{ github.token }}
-        run: |
-          $body = @{
-            names = @(
-              "windows",
-              "windows-utility",
-              "recycle-bin",
-              "tray-app",
-              "cleanup",
-              "golang",
-              "win32",
-              "minibin"
-            )
-          } | ConvertTo-Json -Compress
-
-          $body | gh api --method PUT "repos/$env:GITHUB_REPOSITORY/topics" --input -
+          $assetSpec = "$zip#MiniBin - $env:VERSION.zip"
+          gh release create $env:TAG $assetSpec --repo $env:GITHUB_REPOSITORY --target $env:GITHUB_SHA --title "MiniBin $env:VERSION" --notes-file RELEASE_NOTES.md
